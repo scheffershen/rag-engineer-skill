@@ -30,7 +30,7 @@ def reciprocal_rank_fusion(result_lists, k=60):
     return sorted(scores, key=scores.get, reverse=True)
 ```
 
-**Before building a fused/hybrid pipeline, measure each signal's contribution separately.** Run vector-only and keyword-only retrieval against the same eval set and record, per question, which signal found the expected source. This tells you whether you actually need fusion for a given query type, or whether one signal alone already covers it — fusing blindly can bury a strong keyword hit under noisier vector candidates if weighted wrong.
+**Before building a fused/hybrid pipeline, measure each signal's contribution separately.** Run vector-only and keyword-only retrieval against the same eval set and record, per question, which signal found the expected source. This tells you whether you actually need fusion for a given query type, or whether one signal alone already covers it. Fusing blindly can bury a strong keyword hit under noisier vector candidates if weighted wrong.
 
 ## Query handling before you touch retrieval
 
@@ -42,7 +42,7 @@ Before reaching for a bigger index or a reranker, check whether the *query itsel
 
 ## Reranking
 
-A cross-encoder scores each `(query, candidate)` pair directly (more accurate, much slower) rather than comparing pre-computed embeddings (fast, less precise). Use it as a **second stage** over the top 20-50 candidates from initial retrieval — never as the first-pass retriever, it doesn't scale to a full corpus.
+A cross-encoder scores each `(query, candidate)` pair directly (more accurate, much slower) rather than comparing pre-computed embeddings (fast, less precise). Use it as a **second stage** over the top 20-50 candidates from initial retrieval, never as the first-pass retriever. It doesn't scale to a full corpus.
 
 ```python
 from sentence_transformers import CrossEncoder
@@ -53,7 +53,7 @@ scores = reranker.predict(pairs)
 reranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
 ```
 
-A larger `top_k` at the first stage is not a substitute for reranking or for fixing a retrieval failure — it adds noise to the evidence budget (see `context-assembly-and-citations.md`) without necessarily lifting the correct source higher.
+A larger `top_k` at the first stage is not a substitute for reranking or for fixing a retrieval failure. It adds noise to the evidence budget (see `context-assembly-and-citations.md`) without necessarily lifting the correct source higher.
 
 ## Deduplication
 

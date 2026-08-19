@@ -10,7 +10,7 @@
 
 ## What an embedding model actually buys you
 
-Vector/semantic search finds chunks whose *meaning* is close to the query's meaning, even when the wording differs — paraphrases, synonyms, cross-lingual questions. It is weak at literal identifiers: SOP numbers, acronyms, exact names, dates, version strings. Full-text/keyword search is the mirror image. Neither alone is a complete retrieval strategy — see `retrieval-patterns.md` for combining them.
+Vector/semantic search finds chunks whose *meaning* is close to the query's meaning, even when the wording differs: paraphrases, synonyms, cross-lingual questions. It is weak at literal identifiers: SOP numbers, acronyms, exact names, dates, version strings. Full-text/keyword search is the mirror image. Neither alone is a complete retrieval strategy; see `retrieval-patterns.md` for combining them.
 
 ## Model selection guide
 
@@ -23,7 +23,7 @@ Vector/semantic search finds chunks whose *meaning* is close to the query's mean
 | `all-MiniLM-L6-v2` | 384 | Self-hosted, very fast, lower quality — fine for prototyping |
 | Domain-specific (e.g. `codebert`, `biobert`, legal-BERT variants) | varies | Only worth the switch if you've *measured* general models underperforming on your domain's vocabulary |
 
-Don't default to the largest/most expensive model. Measure retrieval quality on your own eval set first — a smaller model with good chunking often beats a larger model with bad chunking.
+Don't default to the largest/most expensive model. Measure retrieval quality on your own eval set first. A smaller model with good chunking often beats a larger model with bad chunking.
 
 ## Vector database selection
 
@@ -73,15 +73,15 @@ results = client.search(
 )
 ```
 
-**Score thresholds:** a raw similarity score is not a universal quality signal — it depends on the embedding model and the corpus. Calibrate a threshold against your own eval set rather than copying `0.7` from documentation.
+**Score thresholds:** a raw similarity score is not a universal quality signal. It depends on the embedding model and the corpus. Calibrate a threshold against your own eval set rather than copying `0.7` from documentation.
 
 ## Cross-lingual and domain-specific caveats
 
-- Cross-language retrieval quality depends entirely on whether the embedding model was trained multilingually. If a corpus mixes languages (e.g. French SOPs, English questions), verify this explicitly with a cross-lingual test case — don't assume it works.
-- Domain vocabulary (medical, legal, internal jargon/acronyms) can be poorly represented by general-purpose embeddings. If acronym or jargon questions underperform, that's evidence for either a domain-specific model or (often cheaper) a keyword/full-text signal layered on top — see `retrieval-patterns.md`.
+- Cross-language retrieval quality depends entirely on whether the embedding model was trained multilingually. If a corpus mixes languages (e.g. French SOPs, English questions), verify this explicitly with a cross-lingual test case. Don't assume it works.
+- Domain vocabulary (medical, legal, internal jargon/acronyms) can be poorly represented by general-purpose embeddings. If acronym or jargon questions underperform, that's evidence for either a domain-specific model or (often cheaper) a keyword/full-text signal layered on top; see `retrieval-patterns.md`.
 
 ## Embedding refresh
 
 Embeddings go stale in two ways people forget to check for:
-1. **Source document changed** but the index wasn't re-run — the vector still represents the old text.
+1. **Source document changed**, but the index wasn't re-run. The vector still represents the old text.
 2. **Embedding model changed** — old vectors and new vectors are not comparable; a partial re-index mixing model versions in one collection silently corrupts similarity comparisons. Re-embed the whole collection, don't mix.

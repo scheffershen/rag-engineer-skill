@@ -4,7 +4,7 @@ A RAG system is nondeterministic end-to-end, which means "it sounds right" is no
 
 ## Table of contents
 - [The evaluation tuple](#the-evaluation-tuple)
-- [Separate retrieval quality from answer quality — always](#separate-retrieval-quality-from-answer-quality--always)
+- [Separate retrieval quality from answer quality, always](#separate-retrieval-quality-from-answer-quality-always)
 - [Metrics to read separately](#metrics-to-read-separately)
 - [Metadata-only retrieval matching](#metadata-only-retrieval-matching)
 - [Refusal, uncertainty, and hallucination](#refusal-uncertainty-and-hallucination)
@@ -27,9 +27,9 @@ Ground-truth rules worth enforcing before trusting any score:
 - Every expected source must actually exist in the corpus.
 - Every required fact must literally occur in an expected source (not something the evaluator merely believes is true).
 - Unanswerable questions must have no expected source and no required fact.
-- Keep the evaluation set stable while comparing system changes — a moving target makes before/after comparisons meaningless.
+- Keep the evaluation set stable while comparing system changes. A moving target makes before/after comparisons meaningless.
 
-## Separate retrieval quality from answer quality — always
+## Separate retrieval quality from answer quality, always
 
 A fluent, confident answer is not evidence the system works. The first diagnostic question for *any* wrong answer is: **was the evidence missing, or was it present but misused?**
 
@@ -41,18 +41,18 @@ A fluent, confident answer is not evidence the system works. The first diagnosti
 | Unanswerable question gets a confident answer | Grounding/safety | Refusal instruction, evidence threshold, eval set |
 | Correct answer but slow | Operations | Backend latency, call count, context size (`production-reliability.md`) |
 
-Never fix a generation-layer failure and a retrieval-layer failure with the same generic prompt tweak — they need different fixes, and conflating them wastes iteration cycles chasing the wrong layer.
+Never fix a generation-layer failure and a retrieval-layer failure with the same generic prompt tweak. They need different fixes, and conflating them wastes iteration cycles chasing the wrong layer.
 
 ## Metrics to read separately
 
-Report these independently — never collapse them into a single "% accurate":
+Report these independently. Never collapse them into a single "% accurate":
 
 - **Retrieval union / recall** — did the combined indexes return every expected source, before any judge is involved?
 - **Strict answer accuracy** — judge verdict is unambiguously correct.
 - **Lenient accuracy** (`correct + partial`) — useful for diagnosis, not a substitute for strict accuracy in a headline claim.
 - **Source hit rate** — every expected source actually cited in the final answer.
 - **Refusal accuracy** — unanswerable questions correctly declined.
-- **Hallucination rate** — unanswerable questions answered anyway (this and refusal accuracy are not the same axis — track both).
+- **Hallucination rate** — unanswerable questions answered anyway (this and refusal accuracy are not the same axis; track both).
 - **Latency p50 / p95** — see `production-reliability.md`.
 
 A "good baseline statement" names the corpus, eval set version, model, configuration, and metric definition: *"On the N-question eval set, with model X and top-k Y, strict answer accuracy was Z%."* A bare "the chatbot is 90% accurate" is not reproducible and should not be trusted or repeated as a claim.
@@ -63,17 +63,17 @@ A subtle but important scoring bug: crediting a retrieval hit because the expect
 
 ## Refusal, uncertainty, and hallucination
 
-Unanswerable questions in an eval set are safety tests, not "bad questions" — they measure whether the system recognizes the boundary of what it actually knows.
+Unanswerable questions in an eval set are safety tests, not "bad questions." They measure whether the system recognizes the boundary of what it actually knows.
 
 - **Refusal** — a clear statement that the indexed evidence does not establish the requested fact.
 - **Uncertainty** — a calibrated statement of what the evidence *does* support and what remains unknown (partial-evidence case).
-- **Hallucination** — any substantive claim made without adequate support from the evidence actually shown to the model. A fluent *partial* answer can still hallucinate if it adds one unsupported detail — don't only test the all-or-nothing case.
+- **Hallucination** — any substantive claim made without adequate support from the evidence actually shown to the model. A fluent *partial* answer can still hallucinate if it adds one unsupported detail. Don't only test the all-or-nothing case.
 
 Test all four shapes explicitly: no evidence, partial evidence, conflicting evidence, and ambiguous evidence.
 
 ## Question-shape coverage
 
-A single "accuracy" number over a homogeneous question set hides which capability is actually weak. A good eval set covers distinct shapes and reports them separately where useful:
+A single "accuracy" number over a homogeneous question set hides which capability is weak. A good eval set covers distinct shapes and reports them separately where useful:
 
 | Shape | Tests |
 |---|---|
@@ -84,13 +84,13 @@ A single "accuracy" number over a homogeneous question set hides which capabilit
 | Acronym/jargon | Domain vocabulary resolution |
 | Unanswerable | Refusal instead of rewarded hallucination |
 
-A system can perform well on ordinary semantic questions while failing exact-identifier lookups, multi-document reasoning, or refusal — don't let a strong average mask a specific, fixable weak spot.
+A system can perform well on ordinary semantic questions while failing exact-identifier lookups, multi-document reasoning, or refusal. Don't let a strong average mask a specific, fixable weak spot.
 
 ## Baseline hygiene
 
 For every failure worth acting on, record: expected source, actual source(s) retrieved, and the judge's stated reason. This turns a percentage into an engineering hypothesis you can test a fix against, rather than a mood.
 
-Test the *evaluator itself* before trusting its output — an evaluation harness can print a confident percentage while being wrong. Cases worth a scorer self-test: accented/non-ASCII text, multi-source questions, body-text cross-references (see above), missing citations, and refusals.
+Test the *evaluator itself* before trusting its output. An evaluation harness can print a confident percentage while being wrong. Cases worth a scorer self-test: accented/non-ASCII text, multi-source questions, body-text cross-references (see above), missing citations, and refusals.
 
 ## RAGAS and automated judges
 
